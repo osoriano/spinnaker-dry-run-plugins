@@ -1,0 +1,75 @@
+buildscript {
+  repositories {
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}"
+  }
+}
+
+plugins {
+  id "io.spinnaker.plugin.bundler" version "$spinnakerGradleVersion"
+  id "io.spinnaker.project" version "$spinnakerGradleVersion"
+  id("org.jetbrains.kotlin.jvm").version("$kotlinVersion")
+  id "com.diffplug.spotless" version "$spotlessVersion" apply false
+  id "org.jetbrains.kotlinx.kover" version "$koverVersion" apply false
+  id "jacoco"
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+        kotlinOptions {
+            // Support @JvmDefault
+            freeCompilerArgs = ["-Xjvm-default=enable"]
+            jvmTarget = "11"
+            allWarningsAsErrors = true
+        }
+    }
+
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            // Add lint options, but ignore annotation processing linting
+            // Otherwise, the linter expects all Spring annotations to be processed when compiling
+            // See https://github.com/spring-projects/spring-boot/issues/6421
+            options.compilerArgs << "-Xlint:all,-processing" << "-Werror"
+        }
+    }
+}
+
+spinnakerBundle {
+  pluginId = "Osoriano.SpinnakerDryRunPlugin"
+  description = "Spinnaker plugins for testing and development"
+  provider = "https://github.com/osoriano/spinnaker-dry-run-plugins"
+  version = rootProject.version
+}
+
+def getVersion() {
+  def runAttempt = "0"
+  if (project.hasProperty("RUN_ATTEMPT")) {
+    runAttempt = project.property("RUN_ATTEMPT")
+  }
+  return "1.0.${runAttempt}"
+}
+
+version = getVersion()
+
+subprojects {
+  group = "com.pinterest.spinnaker.plugin"
+  version = rootProject.version
+
+  apply plugin: "io.spinnaker.project"
+
+  if (name.endsWith("-deck")) {
+    apply plugin: "io.spinnaker.plugin.ui-extension"
+  } else if (name.endsWith("-core") || name.endsWith("-test") || name.endsWith("-compile-only")) {
+    apply plugin: "java-library"
+  } else {
+    apply plugin: "io.spinnaker.plugin.service-extension"
+  }
+}

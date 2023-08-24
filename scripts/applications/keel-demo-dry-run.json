@@ -1,0 +1,23 @@
+{
+  "job": [
+    {
+      "type": "createApplication",
+      "application": {
+        "dataSources": {
+          "enabled": ["environments"],
+          "disabled": [
+            "executions",
+            "integration",
+            "loadBalancers",
+            "securityGroups",
+            "serverGroups"
+          ]
+        },
+        "name": "keeldemodryrun",
+        "email": "testuser@osoriano.com"
+      }
+    }
+  ],
+  "application": "keeldemodryrun",
+  "description": "Create Application: keeldemodryrun"
+}

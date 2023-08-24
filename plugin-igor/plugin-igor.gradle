@@ -1,0 +1,76 @@
+apply plugin: "jacoco"
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+spinnakerPlugin {
+  serviceName = "igor"
+  pluginClass = "com.osoriano.spinnaker.plugin.igor.SpinnakerIgorPlugin"
+}
+
+dependencies {
+  compileOnly (group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.12.3')
+  compileOnly (group: 'io.spinnaker.igor', name: 'igor-core', version: "${igorVersion}")
+  compileOnly (group: 'io.spinnaker.igor', name: 'igor-web', version: "${igorVersion}")
+  compileOnly (group: 'io.spinnaker.kork', name: 'kork-plugins-api', version: "${korkVersion}")
+  compileOnly (group: 'io.spinnaker.kork', name: 'kork-plugins-spring-api', version: "${korkVersion}")
+  compileOnly (group: 'io.spinnaker.kork', name: 'kork-core', version: "${korkVersion}")
+  compileOnly (group: 'io.spinnaker.kork', name: 'kork-jedis', version: "${korkVersion}")
+  compileOnly (group: 'io.spinnaker.kork', name: 'kork-web', version: "${korkVersion}")
+  compileOnly (group: 'io.spinnaker.kork', name: 'kork-artifacts', version: "${korkVersion}")
+  compileOnly (group: 'com.squareup.retrofit', name: 'retrofit', version: "1.9.0")
+  compileOnly (group: 'com.squareup.retrofit', name: 'converter-jackson', version: "1.9.0")
+  compileOnly (group: 'org.codehaus.groovy', name: 'groovy-all', version: "2.5.11")
+
+  testImplementation (group: 'io.strikt', name: 'strikt-core', version: '0.31.0')
+  testImplementation (group: 'io.spinnaker.igor', name: 'igor-core', version: "${igorVersion}")
+  testImplementation (group: 'io.spinnaker.igor', name: 'igor-web', version: "${igorVersion}")
+  testImplementation (group: 'io.spinnaker.kork', name: 'kork-plugins-api', version: "${korkVersion}")
+  testImplementation (group: 'io.spinnaker.kork', name: 'kork-plugins-spring-api', version: "${korkVersion}")
+  testImplementation (group: 'io.spinnaker.kork', name: 'kork-core', version: "${korkVersion}")
+  testImplementation (group: 'io.spinnaker.kork', name: 'kork-jedis', version: "${korkVersion}")
+  testImplementation (group: 'io.spinnaker.kork', name: 'kork-web', version: "${korkVersion}")
+  testImplementation (group: 'io.spinnaker.kork', name: 'kork-artifacts', version: "${korkVersion}")
+  testImplementation (group: 'io.spinnaker.kork', name: 'kork-plugins-tck', version: "${korkVersion}")
+  testImplementation "org.mockito:mockito-core:3.+"
+  compileOnly "javax.xml.bind:jaxb-api:2.3.1"
+
+
+  implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+  implementation "org.slf4j:slf4j-jdk14:${slf4jVersion}"
+
+  compileOnly "org.projectlombok:lombok:1.18.22"
+  annotationProcessor "org.projectlombok:lombok:1.18.22"
+}
+
+test {
+  useJUnitPlatform()
+}
+
+jacoco {
+  toolVersion = "${jacocoVersion}"
+}
+
+jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      element = 'CLASS'
+
+      limit {
+        counter = 'LINE'
+        value = 'COVEREDRATIO'
+        minimum = 0.7
+      }
+
+      excludes = [
+          'com.osoriano.spinnaker.plugin.igor.config.*',
+          'com.osoriano.spinnaker.plugin.igor.model.*',
+          'com.osoriano.spinnaker.plugin.igor.SpinnakerIgorPlugin',
+      ]
+    }
+  }
+}
+
+check {
+  dependsOn jacocoTestCoverageVerification
+}

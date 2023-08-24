@@ -1,0 +1,83 @@
+apply plugin: "kotlin"
+apply plugin: "com.diffplug.spotless"
+apply plugin: "org.jetbrains.kotlinx.kover"
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+spinnakerPlugin {
+  serviceName = "keel"
+  pluginClass = "com.osoriano.spinnaker.plugin.SpinnakerKeelPlugin"
+}
+
+spotless {
+  kotlin {
+    ktlint("0.48.2").editorConfigOverride(
+      indent_size : '2',
+      continuation_indent_size : '2',
+    )
+  }
+}
+
+kover {
+  verify {
+    rule {
+      // Custom name for the rule
+      name = "coverage-enforcer"
+
+      // Evaluate code coverage at the class level
+      target = 'CLASS'
+
+      // Exclude class for plugin framework integration
+      overrideClassFilter {
+        excludes.addAll("com.osoriano.spinnaker.plugin.SpinnakerKeelPlugin*")
+      }
+
+      bound {
+        minValue = 70
+        counter = 'LINE'
+        valueType = 'COVERED_PERCENTAGE'
+      }
+    }
+  }
+}
+
+dependencies {
+  implementation group: 'commons-codec', name: 'commons-codec', version: '1.15'
+  implementation(enforcedPlatform("io.spinnaker.kork:kork-bom:${korkVersion}"))
+
+  // Needed to prevent LinkageError
+  // see https://documentation.tribefire.com/tribefire.cortex.documentation/concepts-doc/features/tribefire-modules/troubleshooting/slf4j-api-linkage-error.html
+  implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+  implementation "org.slf4j:slf4j-jdk14:${slf4jVersion}"
+
+  compileOnly(project(":plugin-compile-only"))
+  compileOnly (group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-xml', version: '2.12.3')
+  compileOnly (group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "${kotlinVersion}")
+  compileOnly "io.spinnaker.kork:kork-plugins-spring-api:${korkVersion}"
+  compileOnly "io.spinnaker.kork:kork-plugins:${korkVersion}"
+  compileOnly (group: 'io.spinnaker.keel', name: 'keel-api', version: "${keelVersion}")
+  compileOnly (group: 'io.spinnaker.keel', name: 'keel-orca', version: "${keelVersion}")
+  compileOnly (group: 'io.spinnaker.keel', name: 'keel-core', version: "${keelVersion}")
+  compileOnly (group: 'io.spinnaker.keel', name: 'keel-artifact', version: "${keelVersion}")
+  // Use more recent fiat version since the one pulled in transitively is invalid
+  compileOnly (group: 'io.spinnaker.fiat', name: 'fiat-api', version: "1.36.1")
+
+  testImplementation(project(":plugin-compile-only"))
+  testImplementation (group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "${kotlinVersion}")
+  testImplementation "io.spinnaker.kork:kork-plugins-spring-api:${korkVersion}"
+  testImplementation "io.spinnaker.kork:kork-plugins-tck"
+  testImplementation "io.spinnaker.kork:kork-plugins:${korkVersion}"
+  testImplementation (group: 'io.spinnaker.keel', name: 'keel-api', version: "${keelVersion}")
+  testImplementation (group: 'io.spinnaker.keel', name: 'keel-orca', version: "${keelVersion}")
+  testImplementation (group: 'io.spinnaker.keel', name: 'keel-core', version: "${keelVersion}")
+  testImplementation (group: 'io.spinnaker.keel', name: 'keel-artifact', version: "${keelVersion}")
+  // Use more recent fiat version since the one pulled in transitively is invalid
+  testImplementation (group: 'io.spinnaker.fiat', name: 'fiat-api', version: "1.36.1")
+
+  testImplementation (group: "io.mockk", name: "mockk", version: "1.10.5")
+}
+
+test {
+    useJUnitPlatform()
+}

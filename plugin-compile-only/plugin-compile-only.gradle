@@ -1,0 +1,44 @@
+/*
+ * This gradle subproject is used as a workaround for spinnaker
+ * client jar not being up to date.
+ *
+ * In order to use updated Spinnaker code from plugins, code is copied
+ * here from spinnaker projects.
+ *
+ * Once updated client jars are available, this subproject can be
+ * removed.
+ */
+apply plugin: "kotlin"
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+dependencies {
+  compileOnly (group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "${kotlinVersion}")
+  compileOnly "io.spinnaker.kork:kork-plugins-spring-api:${korkVersion}"
+  compileOnly "io.spinnaker.kork:kork-plugins:${korkVersion}"
+  compileOnly (group: 'io.spinnaker.keel', name: 'keel-api', version: "${keelVersion}")
+  compileOnly (group: 'io.spinnaker.keel', name: 'keel-orca', version: "${keelVersion}")
+  compileOnly (group: 'io.spinnaker.keel', name: 'keel-core', version: "${keelVersion}")
+  compileOnly (group: 'io.spinnaker.keel', name: 'keel-artifact', version: "${keelVersion}")
+  // Use more recent fiat version since the one pulled in transitively is invalid
+  compileOnly (group: 'io.spinnaker.fiat', name: 'fiat-api', version: "1.36.1")
+
+  testImplementation (group: "org.jetbrains.kotlin", name: "kotlin-reflect", version: "${kotlinVersion}")
+  testImplementation(enforcedPlatform("io.spinnaker.kork:kork-bom:${korkVersion}"))
+  testImplementation "io.spinnaker.kork:kork-plugins-spring-api:${korkVersion}"
+  testImplementation "io.spinnaker.kork:kork-plugins-tck"
+  testImplementation "io.spinnaker.kork:kork-plugins:${korkVersion}"
+  testImplementation (group: 'io.spinnaker.keel', name: 'keel-api', version: "${keelVersion}")
+  testImplementation (group: 'io.spinnaker.keel', name: 'keel-orca', version: "${keelVersion}")
+  testImplementation (group: 'io.spinnaker.keel', name: 'keel-core', version: "${keelVersion}")
+  testImplementation (group: 'io.spinnaker.keel', name: 'keel-artifact', version: "${keelVersion}")
+  // Use more recent fiat version since the one pulled in transitively is invalid
+  testImplementation (group: 'io.spinnaker.fiat', name: 'fiat-api', version: "1.36.1")
+
+  testImplementation (group: "io.mockk", name: "mockk", version: "1.10.5")
+}
+
+test {
+    useJUnitPlatform()
+}

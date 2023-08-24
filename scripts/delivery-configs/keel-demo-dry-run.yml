@@ -1,0 +1,77 @@
+apiVersion: delivery.config.spinnaker.netflix.com/v1
+application: keeldemodryrun
+artifacts:
+- type: osoriano/dry-run-artifact@v1
+  name: dry-run-artifact-name
+environments:
+- name: latest
+  notifications: []
+  resources:
+  - kind: osoriano/dry-run-resource@v1
+    spec:
+      name: latest
+      artifactReference: dry-run-artifact-name
+      fail: false
+      waitTime: PT60S
+- name: staging
+  constraints:
+  - type: depends-on
+    environment: latest
+  notifications: []
+  resources:
+  - kind: osoriano/dry-run-resource@v1
+    spec:
+      name: staging
+      artifactReference: dry-run-artifact-name
+      fail: false
+      waitTime: PT60S
+  verifyWith:
+  - type: osoriano/dry-run-verification@v1
+    fail: false
+    waitTime: PT60S
+    rollbackBehavior: LAST_SUCCESSFUL
+- name: canary
+  constraints:
+  - type: depends-on
+    environment: staging
+  notifications: []
+  resources:
+  - kind: osoriano/dry-run-resource@v1
+    spec:
+      name: canary
+      artifactReference: dry-run-artifact-name
+      fail: false
+      waitTime: PT60S
+  verifyWith:
+  - type: osoriano/dry-run-verification@v1
+    fail: false
+    waitTime: PT60S
+    rollbackBehavior: LAST_SUCCESSFUL
+- name: control
+  constraints:
+  - type: depends-on
+    environment: canary
+  notifications: []
+  resources:
+  - kind: osoriano/dry-run-resource@v1
+    spec:
+      name: control
+      artifactReference: dry-run-artifact-name
+      fail: false
+      waitTime: PT60S
+- name: prod
+  constraints:
+  - type: depends-on
+    environment: canary
+  notifications: []
+  resources:
+  - kind: osoriano/dry-run-resource@v1
+    spec:
+      name: prod
+      artifactReference: dry-run-artifact-name
+      fail: false
+      waitTime: PT60S
+  # postDeploy:
+  # - type: osoriano/dry-run-post-deploy@v1
+  #   fail: false
+  #   waitTime: PT60S

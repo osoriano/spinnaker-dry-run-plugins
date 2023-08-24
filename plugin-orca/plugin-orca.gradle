@@ -1,0 +1,66 @@
+apply plugin: "jacoco"
+
+sourceCompatibility = 11
+targetCompatibility = 11
+
+spinnakerPlugin {
+  serviceName = "orca"
+  pluginClass = "com.osoriano.spinnaker.plugin.SpinnakerOrcaPlugin"
+}
+
+dependencies {
+  implementation "com.squareup.retrofit2:retrofit:${retrofitVersion}"
+  implementation "com.squareup.retrofit2:converter-gson:${retrofitVersion}"
+
+  implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+  implementation "org.slf4j:slf4j-jdk14:${slf4jVersion}"
+
+  compileOnly "org.projectlombok:lombok:1.18.22"
+  annotationProcessor "org.projectlombok:lombok:1.18.22"
+
+  compileOnly "io.spinnaker.kork:kork-plugins-spring-api:${korkVersion}"
+  compileOnly "io.spinnaker.orca:orca-core:${orcaVersion}"
+  compileOnly "io.spinnaker.orca:orca-api:${orcaVersion}"
+
+  compileOnly(enforcedPlatform("io.spinnaker.orca:orca-bom:${orcaVersion}"))
+
+  testImplementation(enforcedPlatform("io.spinnaker.orca:orca-bom:${orcaVersion}"))
+  testImplementation "io.spinnaker.orca:orca-core"
+  testImplementation "io.spinnaker.orca:orca-api"
+  testImplementation "io.spinnaker.orca:orca-api-tck"
+  testImplementation "io.spinnaker.kork:kork-plugins-spring-api"
+  testImplementation "io.spinnaker.kork:kork-plugins-tck"
+}
+
+tasks.withType(Test) {
+  useJUnitPlatform()
+}
+
+jacoco {
+  toolVersion = "${jacocoVersion}"
+}
+
+jacocoTestCoverageVerification {
+  violationRules {
+    rule {
+      element = 'CLASS'
+
+      limit {
+        counter = 'LINE'
+        value = 'COVEREDRATIO'
+        minimum = 0.7
+      }
+
+      excludes = [
+        // Exclude class for plugin framework integration
+        'com.osoriano.spinnaker.plugin.SpinnakerOrcaPlugin',
+        // Stage classes are not easily testable due to private / protected Orca classes
+        'com.osoriano.spinnaker.plugin.stage.dryrun.DryRunStage',
+      ]
+    }
+  }
+}
+
+check {
+  dependsOn jacocoTestCoverageVerification
+}
